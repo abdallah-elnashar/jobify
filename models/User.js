@@ -42,11 +42,12 @@ const UserSchema = new mongoose.Schema({
 
 // hash password
 UserSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// create JWT
+// // create JWT
 
 UserSchema.methods.createJWT = function () {
   return jwt.sign({ userId: this._id }, process.env.JWT_SECRET, {
@@ -58,7 +59,6 @@ UserSchema.methods.createJWT = function () {
 
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   const isMatch = await bcrypt.compare(candidatePassword, this.password);
-
   return isMatch;
 };
 
